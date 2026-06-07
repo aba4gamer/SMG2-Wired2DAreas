@@ -1,0 +1,13 @@
+{
+  "Name": "Wired 2D Areas",
+  "Author": "Aba Gamer",
+  "Description": "Adds freely shaped 2D areas. Like wired gravities, but for 2D areas.",
+  "ModuleData": [{
+    "NameObjFactory" : [
+        {
+          "Name" : "Wired2DAreaPath",
+          "Function" : "createExtActor<Wired2DAreaPath>",
+          "Include" : "Wired2DAreaPath.h"
+        }
+    ]}]
+}
