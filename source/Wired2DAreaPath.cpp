@@ -103,7 +103,7 @@ AreaObj *checkAreaMode(const char *pName, const TVec3f &pPlayerPos)
         AreaObj *pArea = MR::getAreaObj(pName, pPlayerPos);
         register Mario *pMario;
         __asm {mr pMario, r31}; // Faster than doing MR::getMarioHolder()->getMarioActor().mMario
-        pMario->_6A0 = pArea; // Suspicious point, make this be missing is *probably* what removes the smooth centering
+        pMario->_6A0 = pArea;
         return pArea;
     }
 }
@@ -113,7 +113,6 @@ kmCall(0x803A4AB8, checkAreaMode);
 void voidy() {}
 
 kmCall(0x803A4AC0, voidy); // I can't do 60000000 here for some reason
-kmCall(0x803A4B04, voidy);
 
 void saveRotation(const AreaObj *pArea, TVec3f *pMarioAreaRot)
 {
