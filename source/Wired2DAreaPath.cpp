@@ -91,10 +91,6 @@ void Wired2DAreaPath::control()
     }
 }
 
-bool isSomeWiredPathOn() {
-
-}
-
 
 AreaObj *checkAreaMode(const char *pName, const TVec3f &pPlayerPos)
 {
