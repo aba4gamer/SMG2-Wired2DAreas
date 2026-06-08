@@ -33,8 +33,7 @@ namespace Wired2DAreaPathUtils
 
 Wired2DAreaPath::Wired2DAreaPath(const char *pName) : LiveActor(pName)
 {
-    Wired2DAreaPathUtils::mTranslation = &mTranslation;
-    Wired2DAreaPathUtils::mRotation = &mRotation;
+    
 }
 
 Wired2DAreaPath::~Wired2DAreaPath() {}
@@ -59,6 +58,9 @@ void Wired2DAreaPath::control()
 {
     if (MR::isOnSwitchA(this))
     {
+        // Everything except optimal, I know
+        Wired2DAreaPathUtils::mTranslation = &mTranslation;
+        Wired2DAreaPathUtils::mRotation = &mRotation;
         Wired2DAreaPathUtils::activate = true;
 
         TVec3f railPos;
@@ -68,35 +70,31 @@ void Wired2DAreaPath::control()
         TVec3f sideVec;
         TVec3f playerPos = *MR::getPlayerPos();
 
-        delta.normalize(calcNearestRailPosGravity() - playerPos);
-
         MR::calcNearestRailPosAndDirection(&nearestPos, &nearestDirection, this, playerPos);
+        delta = nearestPos - playerPos;
+        PSVECCrossProduct(nearestDirection, mGravity, sideVec);
+        sideVec.normalize(sideVec);
+        TVec3f finalVecTo2DPlane = sideVec * delta.dot(sideVec);
+
         mTranslation = nearestPos;
 
-        PSVECCrossProduct(nearestDirection, mGravity, sideVec);
         turnToDirectionGravityFront(this, sideVec);
         
         // Smooth correction in case Mario goes off the area. This happens on normal 2D areas but by default not here
-        TVec3f dirTo2DPlane = delta - nearestDirection * delta.dot(nearestDirection);
-        if (PSVECMag(dirTo2DPlane) > 0.01f)
-            MR::getPlayerPos()->add(dirTo2DPlane * 0.75f);
+        
+        if (PSVECMag(finalVecTo2DPlane) > 0.01f) {
+            MR::getPlayerPos()->add(finalVecTo2DPlane * 0.1);   // I wanted this to be constant but THANKFULLY I didn't
+        }
     }
     else {
         Wired2DAreaPathUtils::activate = false;
     }
 }
 
-TVec3f Wired2DAreaPath::calcNearestRailPosGravity()
-{
-    TVec3f railPos;
-    TVec3f playerPos = *MR::getPlayerPos();
-    MR::calcNearestRailPos(&railPos, this, playerPos);
+bool isSomeWiredPathOn() {
 
-    TVec3f delta = railPos - playerPos;
-    TVec3f gravityNorm;
-    gravityNorm.normalize(mGravity);
-    return playerPos + (delta - gravityNorm * delta.dot(gravityNorm));
 }
+
 
 AreaObj *checkAreaMode(const char *pName, const TVec3f &pPlayerPos)
 {
@@ -150,6 +148,10 @@ void calcCubeOrWiredAreaPathPos(const AreaObj *pArea, TVec3f *pMarioAreaPos)
     if (Wired2DAreaPathUtils::activate)
     {
         pMarioAreaPos = Wired2DAreaPathUtils::mTranslation;
+
+        // Not needed anymore, if there's still a controller using it then it will be turned on again. 
+        // This way we avoid a quick movement between stages without turning this off.
+        Wired2DAreaPathUtils::activate = false;
     }
     else if (pArea != nullptr)
     {

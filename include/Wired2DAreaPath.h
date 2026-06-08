@@ -9,6 +9,4 @@ public:
     virtual ~Wired2DAreaPath();
     virtual void init(const JMapInfoIter& rIter);
     virtual void control();
-
-    TVec3f calcNearestRailPosGravity();
 };
